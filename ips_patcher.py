@@ -1,5 +1,5 @@
 from keystone import *
-from itertools import batched
+from itertools import islice
 import argparse
 import os
 import sys
@@ -8,6 +8,18 @@ import sys
 HEX = "0123456789abcdef"
 NSOBID = "3CA12DFAAF9C82DA064D1698DF79CDA1"
 BASE_OFFSET = 0x100 # NSO header is 0x100 bytes in size
+
+
+# https://stackoverflow.com/a/8290490
+def batched(iterable, n):
+    "Batch data into lists of length n. The last batch may be shorter."
+    # batched('ABCDEFG', 3) --> ABC DEF G
+    it = iter(iterable)
+    while True:
+        batch = list(islice(it, n))
+        if not batch:
+            return
+        yield batch
 
 
 def sym_resolver(symbol, value):
