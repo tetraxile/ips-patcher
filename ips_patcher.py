@@ -10,18 +10,6 @@ NSOBID = "3CA12DFAAF9C82DA064D1698DF79CDA1"
 BASE_OFFSET = 0x100 # NSO header is 0x100 bytes in size
 
 
-# https://stackoverflow.com/a/8290490
-def batched(iterable, n):
-    "Batch data into lists of length n. The last batch may be shorter."
-    # batched('ABCDEFG', 3) --> ABC DEF G
-    it = iter(iterable)
-    while True:
-        batch = list(islice(it, n))
-        if not batch:
-            return
-        yield batch
-
-
 def sym_resolver(symbol, value):
     raise NotImplementedError("symbol resolver")
     return False
@@ -31,7 +19,7 @@ def assemble(code: bytes, address: int) -> list[bytes]:
     ks = Ks(KS_ARCH_ARM64, KS_MODE_LITTLE_ENDIAN)
     ks.sym_resolver = sym_resolver
     encoding, count = ks.asm(code, address)
-    return batched(encoding, 4)
+    return [encoding[i:i+4] for i in range(0, count*4, 4)]
 
 
 def main():
@@ -80,7 +68,7 @@ def main():
         f.write(b"IPS32")
 
         for address, code in patches:
-            opcodes = list(assemble(code, address))
+            opcodes = assemble(code, address)
 
             for i, opcode in enumerate(opcodes):
                 f.write((BASE_OFFSET + address + 4*i).to_bytes(4, "big"))
