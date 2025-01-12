@@ -3,6 +3,7 @@
 from keystone import Ks, KS_ARCH_ARM64, KS_MODE_LITTLE_ENDIAN
 import argparse
 import os
+import shutil
 import sys
 
 
@@ -40,6 +41,20 @@ def main():
 
     with open(args.infile, "r") as f:
         lines = [line.split(";")[0].rstrip() for line in f.readlines()]
+
+    if os.path.isdir(args.outdir):
+        yes = ["y", "yes"]
+        no = ["n", "no"]
+        prompt = f"directory `{args.outdir}` already exists. replace it? [y/n] "
+        while (choice := input(prompt).lower()) not in (*yes, *no):
+            pass
+
+        if choice in yes:
+            shutil.rmtree(args.outdir)
+            print(f"removed existing directory `{args.outdir}`")
+        else:
+            print("exiting...")
+            sys.exit(0)
 
     os.mkdir(args.outdir)
 
