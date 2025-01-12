@@ -15,10 +15,18 @@ def sym_resolver(symbol, _):
     raise NotImplementedError("symbol resolver")
 
 
-def assemble(code: bytes, address: int) -> list[bytes]:
+def assemble(code: bytes, address: int, *, verbose: bool = False) -> list[bytes]:
     ks = Ks(KS_ARCH_ARM64, KS_MODE_LITTLE_ENDIAN)
     ks.sym_resolver = sym_resolver
     encoding, count = ks.asm(code, address)
+
+    if verbose:
+        hex = bytes(encoding).hex()
+        print("address: {:08x} -> machine code {}".format(
+            address,
+            " ".join(hex[i:i+8] for i in range(0, len(hex), 8))
+        ))
+
     return [encoding[i:i+4] for i in range(0, count*4, 4)]
 
 
@@ -26,6 +34,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("infile", help="input .asm file")
     parser.add_argument("outdir", help="directory to be created with .ips file inside")
+    parser.add_argument("-v", "--verbose", action="store_true")
 
     args = parser.parse_args()
 
@@ -66,7 +75,7 @@ def main():
         f.write(b"IPS32")
 
         for address, code in patches:
-            opcodes = assemble(code, address)
+            opcodes = assemble(code, address, verbose=args.verbose)
 
             for i, opcode in enumerate(opcodes):
                 f.write((BASE_OFFSET + address + 4*i).to_bytes(4, "big"))
