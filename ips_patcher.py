@@ -1,5 +1,6 @@
-from keystone import *
-from itertools import islice
+#!/usr/bin/env python3
+
+from keystone import Ks, KS_ARCH_ARM64, KS_MODE_LITTLE_ENDIAN
 import argparse
 import os
 import sys
@@ -10,9 +11,8 @@ NSOBID = "3CA12DFAAF9C82DA064D1698DF79CDA1"
 BASE_OFFSET = 0x100 # NSO header is 0x100 bytes in size
 
 
-def sym_resolver(symbol, value):
+def sym_resolver(symbol, _):
     raise NotImplementedError("symbol resolver")
-    return False
 
 
 def assemble(code: bytes, address: int) -> list[bytes]:
@@ -62,8 +62,6 @@ def main():
     if address is not None:
         patches.append((address, ";".join(patch)))
 
-
-
     with open(f"{args.outdir}/{NSOBID}.ips", "wb") as f:
         f.write(b"IPS32")
 
@@ -76,6 +74,7 @@ def main():
                 f.write(bytes(list(opcode)))
             
         f.write(b"EEOF")
+
 
 if __name__ == '__main__':
     main()
