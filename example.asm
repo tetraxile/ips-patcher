@@ -34,7 +34,7 @@
 00520fcc:
 	ret
 
-; reset timer on laoding zones
+; reset timer on loading zones
 00522cc4:
 	str xzr, [x0, #0x6e8]
 	ret
