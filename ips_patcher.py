@@ -41,6 +41,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("infile", help="input .asm file")
     parser.add_argument("outdir", help="directory to be created with .ips file inside")
+    parser.add_argument("-f", "--force", help="force overwrite output file")
     parser.add_argument("-v", "--version", default="100", const="100", nargs="?", choices=["100", "101", "110", "120", "130"], help="version of SMO (default: %(default)s)")
     parser.add_argument("-vvv", "--verbose", action="store_true")
 
@@ -53,8 +54,10 @@ def main():
         yes = ["y", "yes"]
         no = ["n", "no"]
         prompt = f"directory `{args.outdir}` already exists. replace it? [y/n] "
-        while (choice := input(prompt).lower()) not in (*yes, *no):
-            pass
+        while True:
+            choice = input(prompt).lower()
+            if choice in (*yes, *no):
+                break
 
         if choice in yes:
             shutil.rmtree(args.outdir)
