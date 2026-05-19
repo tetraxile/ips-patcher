@@ -8,13 +8,6 @@ import sys
 
 
 HEX = "0123456789abcdef"
-NSOBIDS = {
-    "100": "3CA12DFAAF9C82DA064D1698DF79CDA1",
-    "101": "50ADE4B5EB6E45EFB170A6B230D3B0BA",
-    "110": "948DBBFC2FA0C60E2C30316E4C961ABA",
-    "120": "F5DCCDDB37E97724EBDBCCCDBEB965FF",
-    "130": "B424BE150A8E7D78701CBE7A439D9EBF"
-}
 BASE_OFFSET = 0x100 # NSO header is 0x100 bytes in size
 
 
@@ -42,7 +35,6 @@ def main():
     parser.add_argument("infile", help="input .asm file")
     parser.add_argument("outdir", help="directory to be created with .ips file inside")
     parser.add_argument("-f", "--force", help="force overwrite output file")
-    parser.add_argument("-v", "--version", default="100", const="100", nargs="?", choices=["100", "101", "110", "120", "130"], help="version of SMO (default: %(default)s)")
     parser.add_argument("-vvv", "--verbose", action="store_true")
 
     args = parser.parse_args()
@@ -70,10 +62,14 @@ def main():
 
     patches = []
     address = None
+    nsobid = None
 
     for i, line in enumerate(lines):
         if line == "":
             pass
+
+        elif line.startswith("@nsobid "):
+            nsobid = line[8::]
 
         elif line.startswith(" ") or line.startswith("\t"):
             if address is None:
@@ -96,7 +92,11 @@ def main():
     if address is not None:
         patches.append((address, ";".join(patch)))
 
-    with open(f"{args.outdir}/{NSOBIDS[args.version]}.ips", "wb") as f:
+    if nsobid is None:
+        print("error: forgot nso build id (@nsobid <ID>)")
+        sys.exit(1)
+
+    with open(f"{args.outdir}/{nsobid}.ips", "wb") as f:
         f.write(b"IPS32")
 
         for address, code in patches:
@@ -108,7 +108,6 @@ def main():
                 f.write(bytes(list(opcode)))
             
         f.write(b"EEOF")
-
 
 if __name__ == '__main__':
     main()
