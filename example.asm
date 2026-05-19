@@ -1,3 +1,5 @@
+@nsobid 3CA12DFAAF9C82DA064D1698DF79CDA1 ; Super Mario Odyssey 1.0.0
+
 ; always update coin count
 001deae0:
 	nop
